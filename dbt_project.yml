@@ -1,0 +1,28 @@
+name: "rbac_demo"
+version: "1.0.0"
+config-version: 2
+
+profile: "rbac_demo"
+
+seed-paths: ["seeds"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  rbac_demo:
+    +materialized: table
+
+seeds:
+  rbac_demo:
+    +database: raw_prd
+    csv:
+      +schema: csv
+    jaffle_shop:
+      +schema: customers
+    stripe:
+      +schema: stripe
+
+# on-run-end: "{{ transfer_schemas_ownership(schemas) }}"

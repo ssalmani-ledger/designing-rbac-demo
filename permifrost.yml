@@ -1,0 +1,301 @@
+databases:
+  - analytics_dev:
+      shared: no
+
+  - analytics_stg:
+      shared: no
+
+  - analytics_prd:
+      shared: no
+
+  - raw_dev:
+      shared: no
+
+  - raw_stg:
+      shared: no
+
+  - raw_prd:
+      shared: no
+
+roles:
+  - loader_dev:
+      warehouses:
+        - loading_dev
+      privileges:
+        databases:
+          read:
+            - raw_dev
+          write:
+            - raw_dev
+        schemas:
+          read:
+            - raw_dev.*
+          write:
+            - raw_dev.*
+        tables:
+          read:
+            - raw_dev.*.*
+          write:
+            - raw_dev.*.*
+
+  - loader_stg:
+      warehouses:
+        - loading_stg
+      privileges:
+        databases:
+          read:
+            - raw_stg
+          write:
+            - raw_stg
+        schemas:
+          read:
+            - raw_stg.*
+          write:
+            - raw_stg.*
+        tables:
+          read:
+            - raw_stg.*.*
+          write:
+            - raw_stg.*.*
+
+  - loader_prd:
+      warehouses:
+        - loading_prd
+      privileges:
+        databases:
+          read:
+            - raw_prd
+          write:
+            - raw_prd
+        schemas:
+          read:
+            - raw_prd.*
+          write:
+            - raw_prd.*
+        tables:
+          read:
+            - raw_prd.*.*
+          write:
+            - raw_prd.*.*
+
+  - transformer_dev:
+      warehouses:
+        - transforming_dev
+      privileges:
+        databases:
+          read:
+            - raw_prd
+            - analytics_dev
+          write:
+            - analytics_dev
+        schemas:
+          read:
+            - raw_prd.*
+            - analytics_dev.*
+          write:
+            - analytics_dev.*
+        tables:
+          read:
+            - raw_prd.*.*
+            - analytics_dev.*.*
+          write:
+            - analytics_dev.*.*
+
+  - transformer_stg:
+      warehouses:
+        - transforming_stg
+      privileges:
+        databases:
+          read:
+            - raw_prd
+            - analytics_stg
+          write:
+            - analytics_stg
+        schemas:
+          read:
+            - raw_prd.*
+            - analytics_stg.*
+          write:
+            - analytics_stg.*
+        tables:
+          read:
+            - raw_prd.*.*
+            - analytics_stg.*.*
+          write:
+            - analytics_stg.*.*
+
+  - transformer_prd:
+      warehouses:
+        - transforming_prd
+      privileges:
+        databases:
+          read:
+            - raw_prd
+            - analytics_prd
+          write:
+            - analytics_prd
+        schemas:
+          read:
+            - raw_prd.*
+            - analytics_prd.*
+          write:
+            - analytics_prd.*
+        tables:
+          read:
+            - raw_prd.*.*
+            - analytics_prd.*.*
+          write:
+            - analytics_prd.*.*
+
+  - reporter_dev:
+      warehouses:
+        - reporting_dev
+      privileges:
+        databases:
+          read:
+            - analytics_dev
+        schemas:
+          read:
+            - analytics_dev.*
+        tables:
+          read:
+            - analytics_dev.*.*
+
+  - reporter_stg:
+      warehouses:
+        - reporting_stg
+      privileges:
+        databases:
+          read:
+            - analytics_stg
+        schemas:
+          read:
+            - analytics_stg.*
+        tables:
+          read:
+            - analytics_stg.*.*
+
+  - reporter_prd:
+      warehouses:
+        - reporting_prd
+      privileges:
+        databases:
+          read:
+            - analytics_prd
+        schemas:
+          read:
+            - analytics_prd.*
+        tables:
+          read:
+            - analytics_prd.*.*
+
+  - sysadmin:
+      member_of:
+        - "*"
+      owns:
+        databases:
+          - raw_dev
+          - raw_stg
+          - raw_prd
+          - analytics_dev
+          - analytics_stg
+          - analytics_prd
+        schemas:
+          - raw_dev.*
+          - raw_stg.*
+          - raw_prd.*
+          - analytics_dev.*
+          - analytics_stg.*
+          - analytics_prd.*
+        tables:
+          - raw_dev.*.*
+          - raw_stg.*.*
+          - raw_prd.*.*
+          - analytics_dev.*.*
+          - analytics_stg.*.*
+          - analytics_prd.*.*
+
+users:
+  - airflow_stg:
+      can_login: yes
+      member_of:
+        - transformer_stg
+
+  - airflow_prd:
+      can_login: yes
+      member_of:
+        - transformer_prd
+
+  - ecs_stg:
+      can_login: yes
+      member_of:
+        - loader_stg
+
+  - ecs_prd:
+      can_login: yes
+      member_of:
+        - loader_prd
+
+  - fpoirier:
+      can_login: yes
+      member_of:
+        - transformer_dev
+
+  - klin:
+      can_login: yes
+      member_of:
+        - loader_dev
+        - loader_stg
+        - transformer_dev
+        - sysadmin
+
+  - qgaborit:
+      can_login: yes
+      member_of:
+        - loader_dev
+        - loader_stg
+        - transformer_dev
+        - sysadmin
+
+  - ssalmani:
+      can_login: yes
+      member_of:
+        - loader_dev
+        - loader_stg
+        - transformer_dev
+        - sysadmin
+
+  - tableau:
+      can_login: yes
+      member_of:
+        - reporter_dev
+        - reporter_stg
+        - reporter_prd
+
+warehouses:
+  - loading_dev:
+      size: x-small
+
+  - loading_stg:
+      size: x-small
+
+  - loading_prd:
+      size: x-small
+
+  - transforming_dev:
+      size: x-small
+
+  - transforming_stg:
+      size: x-small
+
+  - transforming_prd:
+      size: x-small
+
+  - reporting_dev:
+      size: x-small
+
+  - reporting_stg:
+      size: x-small
+
+  - reporting_prd:
+      size: x-small

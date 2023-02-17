@@ -1,13 +1,19 @@
+{{
+  config(
+    materialized='view',
+    grants={'select': ["reporter_products"]}
+  )
+}}
+
 with source as (
 
-    select * from {{ ref('raw_payments') }}
+    select * from {{ source('stripe', 'payments') }}
 
 ),
 
 renamed as (
 
     select
-        id as payment_id,
         orderid as order_id,
         paymentmethod as payment_method,
         amount / 100 as amount

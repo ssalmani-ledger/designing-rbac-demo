@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: customers
+    database: sources_prd
+    tables:
+      - name: customers
+        identifier: raw_customers
+
+  - name: stripe
+    database: sources_prd
+    tables:
+      - name: payments
+        identifier: raw_payments
+
+      - name: orders
+        identifier: raw_orders

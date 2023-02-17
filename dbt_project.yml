@@ -1,8 +1,8 @@
-name: "rbac_demo"
+name: "ledger_analytics"
 version: "1.0.0"
 config-version: 2
 
-profile: "rbac_demo"
+profile: "ledger_analytics"
 
 seed-paths: ["seeds"]
 
@@ -12,17 +12,21 @@ clean-targets:
   - "dbt_packages"
 
 models:
-  rbac_demo:
+  ledger_analytics:
     +materialized: table
+    staging:
+      +schema: staging
+    customers:
+      +schema: customers
+      +grants:
+        select: ["reporter_customers"]
 
 seeds:
-  rbac_demo:
-    +database: raw_prd
+  ledger_analytics:
+    +database: sources_prd
     csv:
       +schema: csv
     jaffle_shop:
       +schema: customers
     stripe:
       +schema: stripe
-
-# on-run-end: "{{ transfer_schemas_ownership(schemas) }}"

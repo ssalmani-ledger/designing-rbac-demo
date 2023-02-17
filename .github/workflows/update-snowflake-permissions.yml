@@ -1,0 +1,34 @@
+name: 🛂 Update permissions (Snowflake)
+
+on: [workflow_dispatch]
+
+concurrency:
+  group: update-permissions
+
+jobs:
+  update_permissions:
+    name: 🛂 Update permissions (Snowflake)
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🐍 Setup Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: 🛠️ Setup Permifrost
+        run: |
+          pip install permifrost
+
+      - name: 🛂 Update permissions using Permifrost
+        env:
+          PERMISSION_BOT_USER: ${{ secrets.PERMISSION_BOT_USER }}
+          PERMISSION_BOT_ACCOUNT: ${{ secrets.PERMISSION_BOT_ACCOUNT }}
+          PERMISSION_BOT_WAREHOUSE: ${{ secrets.PERMISSION_BOT_WAREHOUSE }}
+          PERMISSION_BOT_PASSWORD: ${{ secrets.PERMISSION_BOT_PASSWORD }}
+          PERMISSION_BOT_DATABASE: ${{ secrets.PERMISSION_BOT_DATABASE }}
+          PERMISSION_BOT_ROLE: ${{ secrets.PERMISSION_BOT_ROLE }}
+        run: |
+          permifrost run permifrost.yml

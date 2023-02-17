@@ -1,301 +1,759 @@
 databases:
   - analytics_dev:
+      owner: sysadmin_dev
       shared: no
 
   - analytics_stg:
+      owner: sysadmin_stg
       shared: no
 
   - analytics_prd:
+      owner: sysadmin_prd
       shared: no
 
-  - raw_dev:
+  - sources_dev:
+      owner: sysadmin_dev
       shared: no
 
-  - raw_stg:
+  - sources_stg:
+      owner: sysadmin_stg
       shared: no
 
-  - raw_prd:
+  - sources_prd:
+      owner: sysadmin_prd
       shared: no
 
 roles:
-  - loader_dev:
-      warehouses:
-        - loading_dev
-      privileges:
-        databases:
-          read:
-            - raw_dev
-          write:
-            - raw_dev
-        schemas:
-          read:
-            - raw_dev.*
-          write:
-            - raw_dev.*
-        tables:
-          read:
-            - raw_dev.*.*
-          write:
-            - raw_dev.*.*
-
-  - loader_stg:
-      warehouses:
-        - loading_stg
-      privileges:
-        databases:
-          read:
-            - raw_stg
-          write:
-            - raw_stg
-        schemas:
-          read:
-            - raw_stg.*
-          write:
-            - raw_stg.*
-        tables:
-          read:
-            - raw_stg.*.*
-          write:
-            - raw_stg.*.*
-
-  - loader_prd:
-      warehouses:
-        - loading_prd
-      privileges:
-        databases:
-          read:
-            - raw_prd
-          write:
-            - raw_prd
-        schemas:
-          read:
-            - raw_prd.*
-          write:
-            - raw_prd.*
-        tables:
-          read:
-            - raw_prd.*.*
-          write:
-            - raw_prd.*.*
-
-  - transformer_dev:
-      warehouses:
-        - transforming_dev
-      privileges:
-        databases:
-          read:
-            - raw_prd
-            - analytics_dev
-          write:
-            - analytics_dev
-        schemas:
-          read:
-            - raw_prd.*
-            - analytics_dev.*
-          write:
-            - analytics_dev.*
-        tables:
-          read:
-            - raw_prd.*.*
-            - analytics_dev.*.*
-          write:
-            - analytics_dev.*.*
-
-  - transformer_stg:
-      warehouses:
-        - transforming_stg
-      privileges:
-        databases:
-          read:
-            - raw_prd
-            - analytics_stg
-          write:
-            - analytics_stg
-        schemas:
-          read:
-            - raw_prd.*
-            - analytics_stg.*
-          write:
-            - analytics_stg.*
-        tables:
-          read:
-            - raw_prd.*.*
-            - analytics_stg.*.*
-          write:
-            - analytics_stg.*.*
-
-  - transformer_prd:
-      warehouses:
-        - transforming_prd
-      privileges:
-        databases:
-          read:
-            - raw_prd
-            - analytics_prd
-          write:
-            - analytics_prd
-        schemas:
-          read:
-            - raw_prd.*
-            - analytics_prd.*
-          write:
-            - analytics_prd.*
-        tables:
-          read:
-            - raw_prd.*.*
-            - analytics_prd.*.*
-          write:
-            - analytics_prd.*.*
-
-  - reporter_dev:
-      warehouses:
-        - reporting_dev
-      privileges:
-        databases:
-          read:
-            - analytics_dev
-        schemas:
-          read:
-            - analytics_dev.*
-        tables:
-          read:
-            - analytics_dev.*.*
-
-  - reporter_stg:
-      warehouses:
-        - reporting_stg
-      privileges:
-        databases:
-          read:
-            - analytics_stg
-        schemas:
-          read:
-            - analytics_stg.*
-        tables:
-          read:
-            - analytics_stg.*.*
-
-  - reporter_prd:
-      warehouses:
-        - reporting_prd
-      privileges:
-        databases:
-          read:
-            - analytics_prd
-        schemas:
-          read:
-            - analytics_prd.*
-        tables:
-          read:
-            - analytics_prd.*.*
+  # Admin roles
+  - accountadmin:
+      member_of:
+        - sysadmin
 
   - sysadmin:
       member_of:
-        - "*"
+        - sysadmin_dev
+        - sysadmin_stg
+        - sysadmin_prd
+
+  - securityadmin:
+      member_of:
+        - roleadmin_dev
+        - roleadmin_stg
+        - roleadmin_prd
+
+  - roleadmin_dev:
+      owner: useradmin
+
+  - roleadmin_stg:
+      owner: useradmin
+
+  - roleadmin_prd:
+      owner: useradmin
+
+  - sysadmin_dev:
+      owner: useradmin
+      member_of:
+        - loader_dev
+        - transformer_all_dev
+        - transformer_blockchains_dev
+        - transformer_customers_dev
+        - transformer_les_dev
+        - transformer_products_dev
+        - reporter_all_dev
+        - reporter_blockchains_dev
+        - reporter_customers_dev
+        - reporter_les_dev
+        - reporter_products_dev
       owns:
         databases:
-          - raw_dev
-          - raw_stg
-          - raw_prd
+          - sources_dev
           - analytics_dev
+
+  - sysadmin_stg:
+      owner: useradmin
+      member_of:
+        - loader_stg
+        - transformer_all_stg
+        - transformer_blockchains_stg
+        - transformer_customers_stg
+        - transformer_les_stg
+        - transformer_products_stg
+        - reporter_all_stg
+        - reporter_blockchains_stg
+        - reporter_customers_stg
+        - reporter_les_stg
+        - reporter_products_stg
+      owns:
+        databases:
+          - sources_stg
           - analytics_stg
+
+  - sysadmin_prd:
+      owner: useradmin
+      member_of:
+        - loader_prd
+        - transformer_all_prd
+        - transformer_blockchains_prd
+        - transformer_customers_prd
+        - transformer_les_prd
+        - transformer_products_prd
+        - reporter_all_prd
+        - reporter_blockchains_prd
+        - reporter_customers_prd
+        - reporter_les_prd
+        - reporter_products_prd
+      owns:
+        databases:
+          - sources_prd
           - analytics_prd
+
+  # Regular roles
+  - loader_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - sources_dev
+          write:
+            - sources_dev
         schemas:
-          - raw_dev.*
-          - raw_stg.*
-          - raw_prd.*
-          - analytics_dev.*
-          - analytics_stg.*
-          - analytics_prd.*
+          read:
+            - sources_dev.*
+          write:
+            - sources_dev.*
         tables:
-          - raw_dev.*.*
-          - raw_stg.*.*
-          - raw_prd.*.*
-          - analytics_dev.*.*
-          - analytics_stg.*.*
-          - analytics_prd.*.*
+          read:
+            - sources_dev.*.*
+          write:
+            - sources_dev.*.*
+      warehouses:
+        - loading_dev
+
+  - loader_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - sources_stg
+          write:
+            - sources_stg
+        schemas:
+          read:
+            - sources_stg.*
+          write:
+            - sources_stg.*
+        tables:
+          read:
+            - sources_stg.*.*
+          write:
+            - sources_stg.*.*
+      warehouses:
+        - loading_stg
+
+  - loader_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - sources_prd
+          write:
+            - sources_prd
+        schemas:
+          read:
+            - sources_prd.*
+          write:
+            - sources_prd.*
+        tables:
+          read:
+            - sources_prd.*.*
+          write:
+            - sources_prd.*.*
+      warehouses:
+        - loading_prd
+
+  - transformer_all_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_dev
+          write:
+            - analytics_dev
+        schemas:
+          read:
+            - sources_prd.*
+        tables:
+          read:
+            - sources_prd.*.*
+      warehouses:
+        - transforming_dev
+
+  - transformer_all_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_stg
+          write:
+            - analytics_stg
+        schemas:
+          read:
+            - sources_prd.*
+        tables:
+          read:
+            - sources_prd.*.*
+      warehouses:
+        - transforming_stg
+
+  - transformer_all_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_prd
+          write:
+            - analytics_prd
+        schemas:
+          read:
+            - sources_prd.*
+        tables:
+          read:
+            - sources_prd.*.*
+      warehouses:
+        - transforming_prd
+
+  - transformer_blockchains_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_dev
+          write:
+            - analytics_dev
+      warehouses:
+        - transforming_dev
+
+  - transformer_blockchains_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_stg
+          write:
+            - analytics_stg
+      warehouses:
+        - transforming_stg
+
+  - transformer_blockchains_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_prd
+          write:
+            - analytics_prd
+      warehouses:
+        - transforming_prd
+
+  - transformer_customers_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_dev
+          write:
+            - analytics_dev
+      warehouses:
+        - transforming_dev
+
+  - transformer_customers_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_stg
+          write:
+            - analytics_stg
+      warehouses:
+        - transforming_stg
+
+  - transformer_customers_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_prd
+          write:
+            - analytics_prd
+      warehouses:
+        - transforming_prd
+
+  - transformer_les_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_dev
+          write:
+            - analytics_dev
+      warehouses:
+        - transforming_dev
+
+  - transformer_les_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_stg
+          write:
+            - analytics_stg
+      warehouses:
+        - transforming_stg
+
+  - transformer_les_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_prd
+          write:
+            - analytics_prd
+      warehouses:
+        - transforming_prd
+
+  - transformer_products_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_dev
+          write:
+            - analytics_dev
+      warehouses:
+        - transforming_dev
+
+  - transformer_products_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_stg
+          write:
+            - analytics_stg
+      warehouses:
+        - transforming_stg
+
+  - transformer_products_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - sources_prd
+            - analytics_prd
+          write:
+            - analytics_prd
+      warehouses:
+        - transforming_prd
+
+  - reporter_all_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - analytics_dev
+        schemas:
+          read:
+            - analytics_dev.*
+        tables:
+          read:
+            - analytics_dev.*.*
+      warehouses:
+        - reporting_dev
+
+  - reporter_all_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - analytics_stg
+        schemas:
+          read:
+            - analytics_stg.*
+        tables:
+          read:
+            - analytics_stg.*.*
+      warehouses:
+        - reporting_stg
+
+  - reporter_all_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - analytics_prd
+        schemas:
+          read:
+            - analytics_prd.*
+        tables:
+          read:
+            - analytics_prd.*.*
+      warehouses:
+        - reporting_prd
+
+  - reporter_blockchains_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - analytics_dev
+        schemas:
+          read:
+            - analytics_dev.*
+      warehouses:
+        - reporting_dev
+
+  - reporter_blockchains_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - analytics_stg
+        schemas:
+          read:
+            - analytics_stg.*
+      warehouses:
+        - reporting_stg
+
+  - reporter_blockchains_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - analytics_prd
+        schemas:
+          read:
+            - analytics_prd.*
+      warehouses:
+        - reporting_prd
+
+  - reporter_customers_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - analytics_dev
+        schemas:
+          read:
+            - analytics_dev.*
+      warehouses:
+        - reporting_dev
+
+  - reporter_customers_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - analytics_stg
+        schemas:
+          read:
+            - analytics_stg.*
+      warehouses:
+        - reporting_stg
+
+  - reporter_customers_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - analytics_prd
+        schemas:
+          read:
+            - analytics_prd.*
+      warehouses:
+        - reporting_prd
+
+  - reporter_les_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - analytics_dev
+        schemas:
+          read:
+            - analytics_dev.*
+      warehouses:
+        - reporting_dev
+
+  - reporter_les_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - analytics_stg
+        schemas:
+          read:
+            - analytics_stg.*
+      warehouses:
+        - reporting_stg
+
+  - reporter_les_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - analytics_prd
+        schemas:
+          read:
+            - analytics_prd.*
+      warehouses:
+        - reporting_prd
+
+  - reporter_products_dev:
+      owner: roleadmin_dev
+      privileges:
+        databases:
+          read:
+            - analytics_dev
+        schemas:
+          read:
+            - analytics_dev.*
+      warehouses:
+        - reporting_dev
+
+  - reporter_products_stg:
+      owner: roleadmin_stg
+      privileges:
+        databases:
+          read:
+            - analytics_stg
+        schemas:
+          read:
+            - analytics_stg.*
+      warehouses:
+        - reporting_stg
+
+  - reporter_products_prd:
+      owner: roleadmin_prd
+      privileges:
+        databases:
+          read:
+            - analytics_prd
+        schemas:
+          read:
+            - analytics_prd.*
+      warehouses:
+        - reporting_prd
 
 users:
-  - airflow_stg:
+  # Persons
+  - abelghazi:
+      owner: useradmin
       can_login: yes
       member_of:
-        - transformer_stg
+        - transformer_all_dev
+        - reporter_all_dev
+        - reporter_all_stg
+        - reporter_all_prd
+
+  - abrunswick:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - reporter_products_dev
+        - reporter_products_stg
+        - reporter_products_prd
+
+  - amodai:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - transformer_all_dev
+        - reporter_all_dev
+        - reporter_all_stg
+        - reporter_all_prd
+
+  - crichard:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - transformer_all_dev
+        - reporter_all_dev
+        - reporter_all_stg
+        - reporter_all_prd
+
+  - dstarkus:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - reporter_les_dev
+        - reporter_les_stg
+        - reporter_les_prd
+
+  - fpoirier:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - transformer_all_dev
+        - reporter_all_dev
+        - reporter_all_stg
+        - reporter_all_prd
+
+  - gguaquiere:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - transformer_all_dev
+        - reporter_all_dev
+        - reporter_all_stg
+        - reporter_all_prd
+
+  - gherry:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - transformer_all_dev
+        - reporter_all_dev
+        - reporter_all_stg
+        - reporter_all_prd
+
+  - klin:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - accountadmin
+
+  - ltavernier:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - transformer_all_dev
+        - reporter_all_dev
+        - reporter_all_stg
+        - reporter_all_prd
+
+  - mbenisti:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - accountadmin
+
+  - ncaporal:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - reporter_products_dev
+        - reporter_products_stg
+        - reporter_products_prd
+
+  - nprats:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - reporter_les_dev
+        - reporter_les_stg
+        - reporter_les_prd
+
+  - qgaborit:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - sysadmin
+
+  - qhaminh:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - transformer_all_dev
+        - reporter_all_dev
+        - reporter_all_stg
+        - reporter_all_prd
+
+  - ssalmani:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - sysadmin
+
+  # Services
+  - airflow_stg:
+      owner: useradmin
+      can_login: yes
+      member_of:
+        - transformer_all_stg
 
   - airflow_prd:
+      owner: useradmin
       can_login: yes
       member_of:
-        - transformer_prd
+        - transformer_all_prd
 
   - ecs_stg:
+      owner: useradmin
       can_login: yes
       member_of:
         - loader_stg
 
   - ecs_prd:
+      owner: useradmin
       can_login: yes
       member_of:
         - loader_prd
 
-  - fpoirier:
-      can_login: yes
-      member_of:
-        - transformer_dev
-
-  - klin:
-      can_login: yes
-      member_of:
-        - loader_dev
-        - loader_stg
-        - transformer_dev
-        - sysadmin
-
-  - qgaborit:
-      can_login: yes
-      member_of:
-        - loader_dev
-        - loader_stg
-        - transformer_dev
-        - sysadmin
-
-  - ssalmani:
-      can_login: yes
-      member_of:
-        - loader_dev
-        - loader_stg
-        - transformer_dev
-        - sysadmin
-
   - tableau:
+      owner: useradmin
       can_login: yes
       member_of:
-        - reporter_dev
-        - reporter_stg
-        - reporter_prd
+        - reporter_all_dev
+        - reporter_all_stg
+        - reporter_all_prd
 
 warehouses:
   - loading_dev:
+      owner: sysadmin_dev
       size: x-small
 
   - loading_stg:
+      owner: sysadmin_stg
       size: x-small
 
   - loading_prd:
+      owner: sysadmin_prd
       size: x-small
 
   - transforming_dev:
+      owner: sysadmin_dev
       size: x-small
 
   - transforming_stg:
+      owner: sysadmin_stg
       size: x-small
 
   - transforming_prd:
+      owner: sysadmin_prd
       size: x-small
 
   - reporting_dev:
+      owner: sysadmin_dev
       size: x-small
 
   - reporting_stg:
+      owner: sysadmin_stg
       size: x-small
 
   - reporting_prd:
+      owner: sysadmin_prd
       size: x-small
